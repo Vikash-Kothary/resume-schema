@@ -1,20 +1,22 @@
 'use strict';
-var ZSchema = require('z-schema');
-var schema = require('./schema');
+const schema = require('./schema');
+const jobSchema = require('./job-schema');
+const Validator = require('jsonschema').Validator;
 
 function validate(resumeJson, callback) {
-  var callbackWrapper = function(err, valid) {
-    if(err) {
-      callback(err)
-    } else {
-      callback(null, {valid: valid});
-    }
+  const v = new Validator();
+
+  const validation = v.validate(resumeJson, schema);
+
+  if (!validation.valid) {
+    return callback(validation.errors, false);
   }
 
-  new ZSchema().validate(resumeJson, schema, callbackWrapper);
+  return callback(null, true);
 }
 
 module.exports = {
   validate: validate,
-  schema: schema
+  schema,
+  jobSchema,
 };
